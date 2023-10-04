@@ -9,7 +9,7 @@ COPY requirements.txt .
 
 # Install the application dependencies
 RUN apt update
-RUN apt upgrade
+RUN apt -y upgrade
 RUN pip install --upgrade pip
 RUN apt-get install -y pkg-config
 RUN apt-get install -y python3-dev default-libmysqlclient-dev build-essential

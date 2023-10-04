@@ -9,6 +9,7 @@ module "vpc" {
   azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   public_subnets  = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
+  map_public_ip_on_launch = true
 
 }
 
@@ -19,6 +20,9 @@ resource "aws_eks_cluster" "my-cluster" {
   vpc_config {
     subnet_ids = module.vpc.public_subnets
   }
+  depends_on = [
+    aws_iam_role.eks_cluster_role
+  ]
 
 }
 
@@ -27,7 +31,7 @@ resource "aws_eks_node_group" "my-node-group" {
   node_group_name = "my-node-group"
 
   node_role_arn = aws_iam_role.eks_node_group_role.arn
-  subnet_ids    = module.vpc.private_subnets
+  subnet_ids    = module.vpc.public_subnets
   scaling_config {
     desired_size = 2  # Adjust the desired number of nodes as needed
     max_size     = 3  # Adjust the maximum number of nodes as needed
@@ -103,6 +107,12 @@ resource "aws_iam_policy_attachment" "eks_node_group_ecr_readonly_policy" {
 }
 
 resource "aws_iam_policy_attachment" "eks_cluster_policy_attachment" {
+  name       = "example-eks-cluster-policy-attachment"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  roles      = [aws_iam_role.eks_cluster_role.name] # Replace with your EKS cluster role name
+}
+
+resource "aws_iam_policy_attachment" "eks_cluster_CNI_policy_attachment" {
   name       = "example-eks-cluster-policy-attachment"
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   roles      = [aws_iam_role.eks_cluster_role.name] # Replace with your EKS cluster role name

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+spec:
+  selector:
+    app: my-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 81
+      nodePort: 30008
+  type: NodePort  # or NodePort, ClusterIP, etc. depending on your needs
