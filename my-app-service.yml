@@ -8,6 +8,6 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 81
+      targetPort: 5000
       nodePort: 30008
   type: NodePort  # or NodePort, ClusterIP, etc. depending on your needs

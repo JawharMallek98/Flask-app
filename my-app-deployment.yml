@@ -16,4 +16,4 @@ spec:
       - name: my-app-container
         image: jawharmallek/my-flask-app:v1
         ports:
-        - containerPort: 81
+        - containerPort: 5000

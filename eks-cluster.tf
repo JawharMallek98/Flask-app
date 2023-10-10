@@ -19,6 +19,7 @@ resource "aws_eks_cluster" "my-cluster" {
 
   vpc_config {
     subnet_ids = module.vpc.public_subnets
+    endpoint_private_access = true
   }
   depends_on = [
     aws_iam_role.eks_cluster_role
@@ -37,23 +38,10 @@ resource "aws_eks_node_group" "my-node-group" {
     max_size     = 3  # Adjust the maximum number of nodes as needed
     min_size     = 1  # Adjust the minimum number of nodes as needed
   }
-  launch_template {
-    id = aws_launch_template.my-launch-template.id
-    version = "$Latest"  # Use the latest version of the launch template
-  }
+  instance_types = ["t3.meduim"]
   depends_on = [
     aws_iam_role.eks_node_group_role
   ]
-}
-
-resource "aws_launch_template" "my-launch-template" {
-  name_prefix   = "my-launch-template-"
-  
-  # Define the instance type and other launch template settings
-  # Adjust these values according to your requirements
-  instance_type = "t2.micro"
-  
-  # Add other launch template configurations as needed
 }
 
 resource "aws_iam_role" "eks_cluster_role" {
@@ -95,7 +83,7 @@ resource "aws_iam_role" "eks_node_group_role" {
 
 # Attach the required Amazon EKS managed policies
 resource "aws_iam_policy_attachment" "eks_node_group_worker_node_policy" {
-  name       = "example-worker-node-policy-attachment"
+  name       = "example-eks_node_group_worker_node_policy"
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   roles      = [aws_iam_role.eks_node_group_role.name]
 }
@@ -106,6 +94,11 @@ resource "aws_iam_policy_attachment" "eks_node_group_ecr_readonly_policy" {
   roles      = [aws_iam_role.eks_node_group_role.name]
 }
 
+resource "aws_iam_policy_attachment" "eks_node_group_CNI_policy_attachment" {
+  name       = "example-eks-node_group_CNI_policy_attachment"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  roles      = [aws_iam_role.eks_node_group_role.name] # Replace with your EKS cluster role name
+}
 resource "aws_iam_policy_attachment" "eks_cluster_policy_attachment" {
   name       = "example-eks-cluster-policy-attachment"
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
@@ -113,8 +106,8 @@ resource "aws_iam_policy_attachment" "eks_cluster_policy_attachment" {
 }
 
 resource "aws_iam_policy_attachment" "eks_cluster_CNI_policy_attachment" {
-  name       = "example-eks-cluster-policy-attachment"
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  name       = "example-eks-cluster-CNI_policy_attachment"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   roles      = [aws_iam_role.eks_cluster_role.name] # Replace with your EKS cluster role name
 }
 
